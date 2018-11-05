@@ -30,14 +30,86 @@ const groups = [
     {
         id: 1,
         name: 'Familia',
-        members: [1, 2, 3]
+        members: [1, 2, 3],
+        tasks: [
+            {
+                member: 1,
+                assigned: [1, 2, 3]
+            },
+            {
+                member: 2,
+                assigned: [1, 2]
+            },
+            {
+                member: 3,
+                assigned: [1]
+            }
+        ]
     },
     {
         id: 2,
         name: 'Skynet',
-        members: [1, 2]
+        members: [1, 2],
+        tasks: [
+            {
+                member: 1,
+                assigned: [1, 2]
+            },
+            {
+                member: 2,
+                assigned: [1, 2, 3]
+            }
+        ]
     }
 ]
+
+const tasks = [
+    {
+        id: 1,
+        name: 'Sacar la basura'
+    },
+    {
+        id: 2,
+        name: 'Pasear el perro'
+    },
+    {
+        id: 3,
+        name: 'Lavar los platos'
+    }
+]
+
+function userGroups(userId) {
+    const myGroups = []
+    groups.forEach(group => {
+        if (group.members.includes(userId)) {
+            myGroups.push(group)
+        }
+    })
+    return myGroups
+}
+
+function getUserId(req, res) {
+    const userId = parseInt(req.get('X-UserId'))
+    if (!userId) {
+        res.status(401).send('Missing user id')
+        return
+    }
+    return userId
+}
+
+function getUserGroup(groupId, userId, res) {
+    const groups = userGroups(userId)
+    const group = groups.find(({ id }) => {
+        return id === groupId
+    })
+
+    if (!group) {
+        res.status(404).send('Group not found')
+        return
+    }
+
+    return group
+}
 
 app.use(bodyParser.json())
 
@@ -108,7 +180,52 @@ app.post('/groups', (req, res) => {
 })
 
 app.get('/mygroups', (req, res) => {
-    
+    const userId = getUserId(req, res)
+    if (!userId) {
+        return
+    }
+
+    const myGroups = userGroups(userId)
+
+    res.status(200).send(myGroups)
+})
+
+app.get('/groups/:groupId/available_tasks', (req, res) => {
+    const userId = getUserId(req, res)
+    if (!userId) {
+        return
+    }
+
+    const group = getUserGroup(parseInt(req.params.groupId), userId, res)
+    if (!group) {
+        return
+    }
+
+    res.status(200).send(tasks)
+})
+
+app.get('/groups/:groupId/my_tasks', (req, res) => {
+    const userId = getUserId(req, res)
+    if (!userId) {
+        return
+    }
+
+    const group = getUserGroup(parseInt(req.params.groupId), userId, res)
+    if (!group) {
+        return
+    }
+
+    const task = group.tasks.find(({ member }) => {
+        return member === userId
+    })
+
+    if (!task) {
+        res.status(200).send('[]')
+        return
+    }
+
+    const results = task.assigned.map(taskId => tasks.find(({ id }) => id === taskId)).filter(a => a)
+    res.status(200).send(results)
 })
 
 
