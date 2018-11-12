@@ -9,19 +9,19 @@ const users = [
     {
         id: 1,
         username: 'pato9406@gmail.com',
-        password: 123123,
+        password: '123123',
         full_name: 'Cristian Contreras'
     },
     {
         id: 2,
         username: 'pato@test.com',
-        password: 123123,
+        password: '123123',
         full_name: 'Patricio Contreras'
     },
     {
         id: 3,
         username: 'pato94@test.com',
-        password: 123123,
+        password: '123123',
         full_name: 'Rodolfo Contreras'
     }
 ]
