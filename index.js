@@ -30,7 +30,7 @@ const groups = [
     {
         id: 1,
         name: 'Familia',
-        members: [1, 2, 3],
+        members: [{ id: 1, points: 100 }, { id: 2, points: 100 }, { id: 3, points: 100}],
         tasks: [
             {
                 member: 1,
@@ -49,7 +49,7 @@ const groups = [
     {
         id: 2,
         name: 'Skynet',
-        members: [1, 2],
+        members: [{ id: 1, points: 100 }, { id: 2, points: 100 }],
         tasks: [
             {
                 member: 1,
@@ -81,7 +81,7 @@ const tasks = [
 function userGroups(userId) {
     const myGroups = []
     groups.forEach(group => {
-        if (group.members.includes(userId)) {
+        if (group.members.map(({ id }) => id).includes(userId)) {
             myGroups.push(group)
         }
     })
@@ -154,10 +154,20 @@ app.post('/users', (req, res) => {
 })
 
 app.get('/users', (req, res) => {
-    res.send(users)
+    const userId = getUserId(req, res)
+    if (!userId) {
+        return
+    }
+
+    res.send(users.filter(({ id }) => id !== userId))
 })
 
 app.post('/groups', (req, res) => {
+    const userId = getUserId(req, res)
+    if (!userId) {
+        return
+    }
+
     const { name, members } = req.body
     if (!name || !members) {
         res.status(422).send('Missing name or members')
@@ -171,8 +181,10 @@ app.post('/groups', (req, res) => {
         }
     })
 
+    const memberAndPoints = [...members, { id: userId, points: 100 }]
+
     groups.push({
-        ...req.body,
+        ...{ name, members: memberAndPoints },
         id: maxId + 1
     })
 
