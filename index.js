@@ -30,26 +30,33 @@ const groups = [
     {
         id: 1,
         name: 'Familia',
-        members: [{ id: 1, points: 100 }, { id: 2, points: 100 }, { id: 3, points: 100}],
+        members: [
+            { id: 1, points: 100 },
+            { id: 2, points: 100 },
+            { id: 3, points: 100 }
+        ],
         tasks: [
             {
                 member: 1,
-                assigned: [1, 2, 3]
+                assigned: [1]
             },
             {
                 member: 2,
-                assigned: [1, 2]
+                assigned: [2, 3]
             },
             {
                 member: 3,
-                assigned: [1]
+                assigned: []
             }
         ]
     },
     {
         id: 2,
         name: 'Skynet',
-        members: [{ id: 1, points: 100 }, { id: 2, points: 100 }],
+        members: [
+            { id: 1, points: 100 },
+            { id: 2, points: 100 }
+        ],
         tasks: [
             {
                 member: 1,
@@ -57,7 +64,7 @@ const groups = [
             },
             {
                 member: 2,
-                assigned: [1, 2, 3]
+                assigned: [3]
             }
         ]
     }
@@ -240,5 +247,38 @@ app.get('/groups/:groupId/my_tasks', (req, res) => {
     res.status(200).send(results)
 })
 
+app.post('/groups/:groupId/assign_task/:taskId', (req, res) => {
+    const userId = getUserId(req, res)
+    if (!userId) {
+        return
+    }
+
+    const group = getUserGroup(parseInt(req.params.groupId), userId, res)
+    if (!group) {
+        return
+    }
+
+    let task = group.tasks.find(({ member }) => {
+        return member === userId
+    })
+
+    if (!task) {
+        task = {
+            member: userId,
+            assigned: []
+        }
+        group.tasks.append(task)
+    }
+
+    const taskId = parseInt(req.params.taskId)
+    const foundTask = tasks.find(({ id }) => taskId === id)
+    if (!foundTask.id) {
+        res.status(422).send('Invalid task')
+        return
+    }
+
+    task.assigned.push(foundTask.id)
+    res.status(201).end()
+})
 
 app.listen(port, () => console.log(`app listening on port ${port}`))
