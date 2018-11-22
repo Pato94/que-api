@@ -1,9 +1,25 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const multer = require('multer')
+const crypto = require('crypto')
+const path = require('path')
 
 const app = express()
 
 const port = process.env.PORT || 3000
+
+const storage = multer.diskStorage({
+    destination: 'uploads',
+    filename: function (req, file, callback) {
+        crypto.pseudoRandomBytes(16, function(err, raw) {
+            if (err) return callback(err)
+          
+            callback(null, raw.toString('hex') + path.extname(file.originalname))
+        })
+    }
+})
+
+const upload = multer({ storage })
 
 const users = [
     {
@@ -280,5 +296,15 @@ app.post('/groups/:groupId/assign_task/:taskId', (req, res) => {
     task.assigned.push(foundTask.id)
     res.status(201).end()
 })
+
+app.post('/upload', upload.single('image'), (req, res) => {
+    if (!req.file) {
+        res.status(422).send('No file received')
+    } else {
+        res.status(200).send({ file: req.file.path })
+    }
+})
+
+app.use('/uploads', express.static('uploads'))
 
 app.listen(port, () => console.log(`app listening on port ${port}`))
