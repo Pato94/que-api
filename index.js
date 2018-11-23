@@ -316,11 +316,11 @@ app.post('/groups/:groupId/verify_task/:taskId', (req, res) => {
 
     const taskId = parseInt(req.params.taskId)
 
-    let task = group.tasks.find(({ member, assigned }) => {
+    let task = group.tasks.find(({ member }) => {
         return member === userId
     })
 
-    if (!task || !task.includes(taskId)) {
+    if (!task || !task.assigned.includes(taskId)) {
         res.status(422).send('Invalid task')
         return
     }
