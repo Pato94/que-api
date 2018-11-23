@@ -173,7 +173,7 @@ app.post('/users', (req, res) => {
         id: maxId + 1
     })
 
-    res.status(201).send(`{"id": ${maxId + 1} }`)
+    res.status(201).send({ id: maxId + 1 })
 })
 
 app.get('/users', (req, res) => {
