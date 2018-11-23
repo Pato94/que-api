@@ -298,6 +298,53 @@ app.post('/groups/:groupId/assign_task/:taskId', (req, res) => {
     res.status(201).end()
 })
 
+app.post('/groups/:groupId/verify_task/:taskId', (req, res) => {
+    const userId = getUserId(req, res)
+    if (!userId) {
+        return
+    }
+
+    const group = getUserGroup(parseInt(req.params.groupId), userId, res)
+    if (!group) {
+        return
+    }
+
+    const photoUrl = req.params.photoUrl
+    if (!photoUrl) {
+        res.status(422).send('Url not provided')
+    }
+
+    const taskId = parseInt(req.params.taskId)
+
+    let task = group.tasks.find(({ member, assigned }) => {
+        return member === userId
+    })
+
+    if (!task || !task.includes(taskId)) {
+        res.status(422).send('Invalid task')
+        return
+    }
+
+    const foundTask = tasks.find(({ id }) => taskId === id)
+    if (!foundTask.id) {
+        res.status(422).send('Invalid task')
+        return
+    }
+
+    if (!group.verifications) {
+        group.verifications = []
+    }
+
+    group.verifications.push({
+        member: userId,
+        task: taskId,
+        url: photoUrl
+    })
+
+    res.status(201).end()
+})
+
+
 app.post('/upload', upload.single('image'), (req, res) => {
     if (!req.file) {
         res.status(422).send('No file received')
