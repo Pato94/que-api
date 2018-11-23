@@ -208,7 +208,8 @@ app.post('/groups', (req, res) => {
 
     groups.push({
         ...{ name, members: memberAndPoints },
-        id: maxId + 1
+        id: maxId + 1,
+        tasks: []
     })
 
     res.status(201).end()
