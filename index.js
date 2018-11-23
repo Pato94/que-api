@@ -309,7 +309,7 @@ app.post('/groups/:groupId/verify_task/:taskId', (req, res) => {
         return
     }
 
-    const photoUrl = req.params.photoUrl
+    const { photo_url: photoUrl } = req.body
     if (!photoUrl) {
         res.status(422).send('Url not provided')
     }
