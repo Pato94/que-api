@@ -284,7 +284,7 @@ app.post('/groups/:groupId/assign_task/:taskId', (req, res) => {
             member: userId,
             assigned: []
         }
-        group.tasks.append(task)
+        group.tasks.push(task)
     }
 
     const taskId = parseInt(req.params.taskId)
