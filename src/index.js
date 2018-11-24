@@ -55,6 +55,18 @@ function getUserGroup(groupId, userId, res) {
     return group
 }
 
+function addNotification(userId, group, message, url) {
+    if (!group.notifications) {
+        group.notifications = []
+    }
+
+    group.notifications.push({
+        producer: userId,
+        message: message,
+        url: url
+    })
+}
+
 app.use(bodyParser.json())
 
 app.post('/login', (req, res) => {
@@ -198,6 +210,16 @@ app.post('/groups/:groupId/assign_task/:taskId', (req, res) => {
     res.status(201).end()
 })
 
+app.get('/groups/:groupId/notifications', (req, res) => {
+    const userId = getUserId(req, res)
+    if (!userId) return
+
+    const group = getUserGroup(parseInt(req.params.groupId), userId, res)
+    if (!group) return
+
+    res.status(200).send((group.notifications || []).filter(({ producer }) => producer !== userId))
+})
+
 app.post('/groups/:groupId/verify_task/:taskId', (req, res) => {
     const userId = getUserId(req, res)
     if (!userId) return
@@ -229,9 +251,51 @@ app.post('/groups/:groupId/verify_task/:taskId', (req, res) => {
         url: photoUrl
     })
 
+    const username = users.find(({ id }) => userId === id).username
+
+    addNotification(
+        userId,
+        group,
+        `${username} solicitó una verificación para la tarea "${task.name}"`,
+        photoUrl
+    )
+
     res.status(201).end()
 })
 
+app.post('/token', (req, res) => {
+    const userId = getUserId(req, res)
+    if (!userId) return
+
+    const user = users.find(({ id }) => id === userId)
+    if (!user) {
+        res.status(401).send('User not found')
+        return
+    }
+
+    const { value } = req.query
+    if (!value) {
+        res.status(422).send('Token not provided')
+        return
+    }
+
+    user.token = value
+    res.send(200).end()
+})
+
+app.del('/token', (req, res) => {
+    const userId = getUserId(req, res)
+    if (!userId) return
+
+    const user = users.find(({ id }) => id === userId)
+    if (!user) {
+        res.status(401).send('User not found')
+        return
+    }
+
+    user.token = undefined
+    res.send(200).end()
+})
 
 app.post('/upload', upload.single('image'), (req, res) => {
     if (!req.file) {

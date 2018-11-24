@@ -9,6 +9,7 @@ chai.use(chaiHttp)
 
 const get = (url) => chai.request(server).get(url)
 const post = (url) => chai.request(server).post(url)
+const del = (url) => chai.request(server).delete(url)
 
 describe('POST /login', () => {
     it('should return unauthorized when invalid credentials are provided', (done) => {
@@ -179,7 +180,7 @@ describe('GET /mygroups', () => {
 
     it('should return my groups', (done) => {
         get('/mygroups')
-            .set('X-UserId', 1)
+            .set('X-UserId', '1')
             .end((err, res) => {
                 expect(res.status).to.eq(200)
                 expect(res.body).to.be.an('array')
@@ -199,7 +200,7 @@ describe('GET /groups/:groupId/available_tasks', () => {
 
     it('should return 404 when the user does not belong to that group', (done) => {
         get('/groups/1/available_tasks')
-            .set('X-UserId', 9999)
+            .set('X-UserId', '9999')
             .end((err, res) => {
                 expect(res.status).to.eq(404)
                 done()
@@ -208,7 +209,7 @@ describe('GET /groups/:groupId/available_tasks', () => {
 
     it('should return the user groups', (done) => {
         get('/groups/1/available_tasks')
-            .set('X-UserId', 1)
+            .set('X-UserId', '1')
             .end((err, res) => {
                 expect(res.status).to.eq(200)
                 expect(res.body).to.be.an('array')
@@ -228,7 +229,7 @@ describe('GET /my_tasks', () => {
 
     it('should return 404 when the user does not belong to that group', (done) => {
         get('/groups/1/my_tasks')
-            .set('X-UserId', 9999)
+            .set('X-UserId', '9999')
             .end((err, res) => {
                 expect(res.status).to.eq(404)
                 done()
@@ -237,7 +238,7 @@ describe('GET /my_tasks', () => {
 
     it('should return my assigned tasks', (done) => {
         get('/groups/1/my_tasks')
-            .set('X-UserId', 1)
+            .set('X-UserId', '1')
             .end((err, res) => {
                 expect(res.status).to.eq(200)
                 expect(res.body).to.be.an('array')
@@ -257,7 +258,7 @@ describe('POST /assign_task', () => {
 
     it('should return 404 when the user does not belong to that group', (done) => {
         post('/groups/1/assign_task/1')
-            .set('X-UserId', 9999)
+            .set('X-UserId', '9999')
             .end((err, res) => {
                 expect(res.status).to.eq(404)
                 done()
@@ -266,7 +267,7 @@ describe('POST /assign_task', () => {
 
     it('should return 422 when the task does not exist', (done) => {
         post('/groups/1/assign_task/9999')
-            .set('X-UserId', 1)
+            .set('X-UserId', '1')
             .end((err, res) => {
                 expect(res.status).to.eq(422)
                 done()
@@ -275,9 +276,53 @@ describe('POST /assign_task', () => {
 
     it('should return assign me a new task', (done) => {
         post('/groups/1/assign_task/1')
-            .set('X-UserId', 1)
+            .set('X-UserId', '1')
             .end((err, res) => {
                 expect(res.status).to.eq(201)
+                done()
+            })
+    })
+})
+
+describe('GET /notifications', () => {
+    it('should return 401 when the user is not authenticated', (done) => {
+        get('/groups/1/notifications')
+            .end((err, res) => {
+                expect(res.status).to.eq(401)
+                done()
+            })
+    })
+
+    it('should return 404 when the user does not belong to that group', (done) => {
+        get('/groups/1/notifications')
+            .set('X-UserId', '9999')
+            .end((err, res) => {
+                expect(res.status).to.eq(404)
+                done()
+            })
+    })
+
+    it('should return group notifications', (done) => {
+        get('/groups/1/notifications')
+            .set('X-UserId', '1')
+            .end((err, res) => {
+                expect(res.status).to.eq(200)
+                expect(res.body).to.be.an('array')
+                done()
+            })
+    })
+
+    it('should not return notifications produced by me', (done) => {
+        const group = groups.find(({ id }) => id === 1)
+        group.notifications = [
+            { producer: 1, message: 'lalala', url: 'lalala' },
+            { producer: 2, message: 'lalala', url: 'lalala' },
+        ]
+
+        get('/groups/1/notifications')
+            .set('X-UserId', '1')
+            .end((err, res) => {
+                expect(res.body.length).to.eq(1)
                 done()
             })
     })
@@ -294,7 +339,7 @@ describe('POST /verify_task', () => {
 
     it('should return 404 when the user does not belong to that group', (done) => {
         post('/groups/1/verify_task/1')
-            .set('X-UserId', 9999)
+            .set('X-UserId', '9999')
             .end((err, res) => {
                 expect(res.status).to.eq(404)
                 done()
@@ -303,7 +348,7 @@ describe('POST /verify_task', () => {
 
     it('should return 422 when the task does not exist', (done) => {
         post('/groups/1/verify_task/9999')
-            .set('X-UserId', 1)
+            .set('X-UserId', '1')
             .send({ photo_url: 'pepita' })
             .end((err, res) => {
                 expect(res.status).to.eq(422)
@@ -313,7 +358,7 @@ describe('POST /verify_task', () => {
 
     it('should return 422 when the task was not assigned to the user', (done) => {
         post('/groups/1/verify_task/2')
-            .set('X-UserId', 1)
+            .set('X-UserId', '1')
             .send({ photo_url: 'pepita' })
             .end((err, res) => {
                 expect(res.status).to.eq(422)
@@ -323,7 +368,7 @@ describe('POST /verify_task', () => {
 
     it('should return 422 when the url is not provided', (done) => {
         post('/groups/1/verify_task/1')
-            .set('X-UserId', 1)
+            .set('X-UserId', '1')
             .send({ photoUrl: 'pepita' })
             .end((err, res) => {
                 expect(res.status).to.eq(422)
@@ -331,12 +376,115 @@ describe('POST /verify_task', () => {
             })
     })
 
-    it('should return assign me a new task', (done) => {
+    it('should verify a task', (done) => {
         post('/groups/1/verify_task/1')
-            .set('X-UserId', 1)
+            .set('X-UserId', '1')
             .send({ photo_url: 'pepita' })
             .end((err, res) => {
                 expect(res.status).to.eq(201)
+                done()
+            })
+    })
+
+    it('should add a verification to the group object', (done) => {
+        const group = groups.find(({ id }) => id === 1)
+        const verifications = (group.verifications || []).length
+        post('/groups/1/verify_task/2')
+            .set('X-UserId', '2')
+            .send({ photo_url: 'lalal' })
+            .end(() => {
+                expect(group.verifications.some(({ url }) => url === 'lalal')).to.be.true
+                expect(group.verifications.length - 1).to.eq(verifications)
+                done()
+            })
+    })
+
+    it('should add a notification to the group object', (done) => {
+        const group = groups.find(({ id }) => id === 1)
+        const notifications = (group.notifications || []).length
+        post('/groups/1/verify_task/3')
+            .set('X-UserId', '2')
+            .send({ photo_url: 'lalal' })
+            .end(() => {
+                expect(group.notifications.some(({ url }) => url === 'lalal')).to.be.true
+                expect(group.notifications.length - 1).to.eq(notifications)
+                done()
+            })
+    })
+})
+
+describe('POST /token', () => {
+    it('should return 401 when the user is not authenticated', (done) => {
+        post('/token?value=pepita')
+            .end((err, res) => {
+                expect(res.status).to.eq(401)
+                done()
+            })
+    })
+
+    it('should return 401 when the user does not exist', (done) => {
+        post('/token?value=pepita')
+            .set('X-UserId', '99999')
+            .end((err, res) => {
+                expect(res.status).to.eq(401)
+                done()
+            })
+    })
+
+    it('should return 200 when everything is ok', (done) => {
+        post('/token?value=pepita')
+            .set('X-UserId', '1')
+            .end((err, res) => {
+                expect(res.status).to.eq(200)
+                done()
+            })
+    })
+
+    it('should store the token', (done) => {
+        const user = users.find(({ id }) => id === 2)
+        post('/token?value=pepita')
+            .set('X-UserId', '2')
+            .end(() => {
+                expect(user.token).to.eq('pepita')
+                done()
+            })
+    })
+})
+
+describe('DELETE /token', () => {
+    it('should return 401 when the user is not authenticated', (done) => {
+        del('/token')
+            .end((err, res) => {
+                expect(res.status).to.eq(401)
+                done()
+            })
+    })
+
+    it('should return 401 when the user does not exist', (done) => {
+        del('/token')
+            .set('X-UserId', '99999')
+            .end((err, res) => {
+                expect(res.status).to.eq(401)
+                done()
+            })
+    })
+
+    it('should return 200 when everything is ok', (done) => {
+        del('/token')
+            .set('X-UserId', '1')
+            .end((err, res) => {
+                expect(res.status).to.eq(200)
+                done()
+            })
+    })
+
+    it('should delete the token', (done) => {
+        const user = users.find(({ id }) => id === 2)
+        user.token = 'saraza'
+        del('/token')
+            .set('X-UserId', '2')
+            .end(() => {
+                expect(user.token).to.be.undefined
                 done()
             })
     })
