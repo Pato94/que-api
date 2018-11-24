@@ -289,7 +289,7 @@ app.post('/groups/:groupId/assign_task/:taskId', (req, res) => {
 
     const taskId = parseInt(req.params.taskId)
     const foundTask = tasks.find(({ id }) => taskId === id)
-    if (!foundTask.id) {
+    if (!foundTask || !foundTask.id) {
         res.status(422).send('Invalid task')
         return
     }
@@ -325,12 +325,6 @@ app.post('/groups/:groupId/verify_task/:taskId', (req, res) => {
         return
     }
 
-    const foundTask = tasks.find(({ id }) => taskId === id)
-    if (!foundTask.id) {
-        res.status(422).send('Invalid task')
-        return
-    }
-
     if (!group.verifications) {
         group.verifications = []
     }
@@ -356,3 +350,5 @@ app.post('/upload', upload.single('image'), (req, res) => {
 app.use('/uploads', express.static('uploads'))
 
 app.listen(port, () => console.log(`app listening on port ${port}`))
+
+module.exports = app;
