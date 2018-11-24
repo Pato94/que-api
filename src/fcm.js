@@ -12,7 +12,7 @@ const createMessage = (to, body) => ({
     }
 })
 
-export default function (token, message) {
+module.exports = function (token, message) {
     if (process.env.NODE_ENV === 'production') {
         fcm.send(createMessage(token, message), (err, res) => {
             if (err) {
