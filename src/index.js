@@ -4,6 +4,7 @@ const multer = require('multer')
 const crypto = require('crypto')
 const path = require('path')
 const { users, groups, tasks } = require('./data')
+const fcm = require('./fcm')
 
 const app = express()
 
@@ -64,6 +65,14 @@ function addNotification(userId, group, message, url) {
         producer: userId,
         message: message,
         url: url
+    })
+
+    // TODO: Además necesitamos filtrar al creador
+    group.members.map(({ id: userId }) => {
+        const user = users.find(({ id }) => userId === id)
+        return user && user.token
+    }).filter(a => a).forEach(token => {
+        fcm(token, message)
     })
 }
 
@@ -308,5 +317,6 @@ app.post('/upload', upload.single('image'), (req, res) => {
 app.use('/uploads', express.static('uploads'))
 
 app.listen(port, () => console.log(`app listening on port ${port}`))
+console.log(`ENV is ${process.env.NODE_ENV}`)
 
 module.exports = app;
