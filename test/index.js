@@ -1,6 +1,7 @@
 const chai = require('chai')
 const chaiHttp = require('chai-http')
 const server = require('../src')
+const { users, groups, tasks } = require('../src/data')
 
 const expect = chai.expect
 
@@ -49,13 +50,44 @@ describe('POST /users', () => {
             })
     })
 
-    it('should return 201 and the created user id when the data is valid', (done) => {
+    it('should return the created user id', (done) => {
         post('/users')
             .send({ username: 'pato99@test.com', password: '123123' })
             .end((err, res) => {
                 expect(res.status).to.eq(201)
                 expect(res.body.id).to.be.a('number')
                 done()
+            })
+    })
+
+    it('should add a new user to the database', (done) => {
+        const initialSize = users.length
+
+        post('/users')
+            .send({ username: 'pato100@test.com', password: '123123' })
+            .end(() => {
+                expect(users.some(({ username }) => username === 'pato100@test.com')).to.be.true
+                expect(users.length - 1).to.eq(initialSize)
+                done()
+            })
+    })
+
+    it('should be able to respond mygroups of a new user', (done) => {
+        const withUserId = (userId) => {
+            get('/mygroups')
+                .set('X-UserId', userId.toString())
+                .end((err, res) => {
+                    expect(res.status).to.eq(200)
+                    expect(res.body).to.be.an('array')
+                    expect(res.body).to.be.empty
+                    done()
+                })
+        }
+
+        post('/users')
+            .send({ username: 'pato101@test.com', password: '123123' })
+            .end((err, req) => {
+                withUserId(req.body.id)
             })
     })
 })
@@ -115,6 +147,22 @@ describe('POST /groups', () => {
             .set('X-UserId', '1')
             .end((err, res) => {
                 expect(res.status).to.eq(201)
+                done()
+            })
+    })
+
+    it('should add a new group to the database', (done) => {
+        const initialSize = groups.length
+
+        post('/groups')
+            .send({
+                name: 'Los testeros',
+                members: [ { id: 1, points: 100 }, { id: 2, points: 100 }, { id: 3, points: 100 } ]
+            })
+            .set('X-UserId', '1')
+            .end((err, res) => {
+                expect(groups.some(({ name }) => name === 'Los testeros')).to.be.true
+                expect(groups.length - 1).to.eq(initialSize)
                 done()
             })
     })
