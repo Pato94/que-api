@@ -178,12 +178,18 @@ app.post('/users', (req, res) => {
 
 app.get('/users', (req, res) => {
     const userId = getUserId(req, res)
+    if (!userId) {
+        return
+    }
 
     res.send(users.filter(({ id }) => id !== userId))
 })
 
 app.post('/groups', (req, res) => {
     const userId = getUserId(req, res)
+    if (!userId) {
+        return
+    }
 
     const { name, members } = req.body
     if (!name || !members) {
@@ -211,6 +217,10 @@ app.post('/groups', (req, res) => {
 
 app.get('/mygroups', (req, res) => {
     const userId = getUserId(req, res)
+    if (!userId) {
+        return
+    }
+
     const myGroups = userGroups(userId)
 
     res.status(200).send(myGroups)
@@ -218,17 +228,32 @@ app.get('/mygroups', (req, res) => {
 
 app.get('/groups/:groupId/available_tasks', (req, res) => {
     const userId = getUserId(req, res)
-    // noinspection JSUnusedLocalSymbols
+    if (!userId) {
+        return
+    }
+
     const group = getUserGroup(parseInt(req.params.groupId), userId, res)
+    if (!group) {
+        return
+    }
 
     res.status(200).send(tasks)
 })
 
 app.get('/groups/:groupId/my_tasks', (req, res) => {
     const userId = getUserId(req, res)
-    const group = getUserGroup(parseInt(req.params.groupId), userId, res)
+    if (!userId) {
+        return
+    }
 
-    const task = group.tasks.find(({ member }) => member === userId)
+    const group = getUserGroup(parseInt(req.params.groupId), userId, res)
+    if (!group) {
+        return
+    }
+
+    const task = group.tasks.find(({ member }) => {
+        return member === userId
+    })
 
     if (!task) {
         res.status(200).send('[]')
@@ -241,9 +266,18 @@ app.get('/groups/:groupId/my_tasks', (req, res) => {
 
 app.post('/groups/:groupId/assign_task/:taskId', (req, res) => {
     const userId = getUserId(req, res)
-    const group = getUserGroup(parseInt(req.params.groupId), userId, res)
+    if (!userId) {
+        return
+    }
 
-    let task = group.tasks.find(({ member }) => member === userId)
+    const group = getUserGroup(parseInt(req.params.groupId), userId, res)
+    if (!group) {
+        return
+    }
+
+    let task = group.tasks.find(({ member }) => {
+        return member === userId
+    })
 
     if (!task) {
         task = {
@@ -266,7 +300,14 @@ app.post('/groups/:groupId/assign_task/:taskId', (req, res) => {
 
 app.post('/groups/:groupId/verify_task/:taskId', (req, res) => {
     const userId = getUserId(req, res)
+    if (!userId) {
+        return
+    }
+
     const group = getUserGroup(parseInt(req.params.groupId), userId, res)
+    if (!group) {
+        return
+    }
 
     const { photo_url: photoUrl } = req.body
     if (!photoUrl) {
@@ -275,7 +316,9 @@ app.post('/groups/:groupId/verify_task/:taskId', (req, res) => {
 
     const taskId = parseInt(req.params.taskId)
 
-    const task = group.tasks.find(({ member }) => member === userId)
+    let task = group.tasks.find(({ member }) => {
+        return member === userId
+    })
 
     if (!task || !task.assigned.includes(taskId)) {
         res.status(422).send('Invalid task')
