@@ -212,12 +212,15 @@ app.post('/groups/:groupId/assign_task/:taskId', (req, res) => {
 
     const taskId = parseInt(req.params.taskId)
     const foundTask = tasks.find(({ id }) => taskId === id)
-    if (!foundTask || !foundTask.id) {
+    const groupTasks = group.availableTasks
+    if (!foundTask || !foundTask.id || !groupTasks.includes(taskId)) {
         res.status(422).send('Invalid task')
         return
     }
 
     task.assigned.push(foundTask.id)
+    group.availableTasks = group.availableTasks.filter(id => id !== foundTask.id)
+
     res.status(201).end()
 })
 

@@ -43,7 +43,7 @@ module.exports.groups = [
                 assigned: []
             }
         ],
-        availableTasks: [1, 2, 3]
+        availableTasks: [3, 4]
     },
     {
         id: 2,
@@ -55,14 +55,14 @@ module.exports.groups = [
         tasks: [
             {
                 member: 1,
-                assigned: [1, 2]
+                assigned: [1]
             },
             {
                 member: 2,
                 assigned: [3]
             }
         ],
-        availableTasks: [1, 2, 3]
+        availableTasks: [2]
     }
 ]
 
@@ -80,6 +80,11 @@ module.exports.tasks = [
     {
         id: 3,
         name: 'Lavar los platos',
+        reward: 100
+    },
+    {
+        id: 4,
+        name: 'Barrer',
         reward: 100
     }
 ]

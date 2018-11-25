@@ -276,11 +276,25 @@ describe('POST /assign_task', () => {
             })
     })
 
-    it('should return assign me a new task', (done) => {
-        post('/groups/1/assign_task/1')
+    it('should return 201 if everything is ok', (done) => {
+        post('/groups/1/assign_task/4')
             .set('X-UserId', '1')
             .end((err, res) => {
                 expect(res.status).to.eq(201)
+                done()
+            })
+    })
+
+    it('should remove the task from the group available tasks', (done) => {
+        const group = groups.find(({ id }) => id === 2)
+        const initialAvailableTasks = group.availableTasks.length
+
+        post('/groups/2/assign_task/2')
+            .set('X-UserId', '1')
+            .end((err, res) => {
+                expect(res.status).to.eq(201)
+                expect(initialAvailableTasks - 1).to.eq(group.availableTasks.length)
+                expect(group.availableTasks).to.not.include(2)
                 done()
             })
     })
@@ -391,7 +405,7 @@ describe('POST /verify_task', () => {
     it('should add a verification to the group object', (done) => {
         const group = groups.find(({ id }) => id === 1)
         const verifications = (group.verifications || []).length
-        post('/groups/1/verify_task/2')
+        post('/groups/1/verify_task/3')
             .set('X-UserId', '2')
             .send({ photo_url: 'lalal' })
             .end(() => {
