@@ -9,6 +9,12 @@ const createMessage = (to, body) => ({
     notification: {
         title: 'Nueva Notificación',
         body
+    },
+
+    data: {
+        title: 'Nueva Notificación',
+        message: body,
+        deeplink: 'quehaceres://deeplink/groups/1/notifications'
     }
 })
 
