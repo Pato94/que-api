@@ -13,9 +13,9 @@ const port = process.env.PORT || 3000
 const storage = multer.diskStorage({
     destination: 'uploads',
     filename: function (req, file, callback) {
-        crypto.pseudoRandomBytes(16, function(err, raw) {
+        crypto.pseudoRandomBytes(16, function (err, raw) {
             if (err) return callback(err)
-          
+
             callback(null, raw.toString('hex') + path.extname(file.originalname))
         })
     }
@@ -84,7 +84,7 @@ app.post('/login', (req, res) => {
         if (user.username === username && user.password === password) {
             res.send(user).end()
         }
-    });
+    })
 
     res.status(401).end()
 })
@@ -111,7 +111,7 @@ app.post('/users', (req, res) => {
     })
 
     if (end) return
-    
+
     users.push({
         ...req.body,
         id: maxId + 1
@@ -144,7 +144,7 @@ app.post('/groups', (req, res) => {
         }
     })
 
-    const memberAndPoints = [...members, { id: userId, points: 100 }]
+    const memberAndPoints = [ ...members, { id: userId, points: 100 } ]
 
     groups.push({
         ...{ name, members: memberAndPoints },
@@ -235,7 +235,11 @@ app.get('/groups/:groupId/notifications', (req, res) => {
         .send(
             (group.notifications || [])
                 .filter(({ producer }) => producer !== userId)
-                .map(({ producer }) => users.find(({ id }) => id === producer)))
+                .map((notif) => ({
+                    ...notif,
+                    producer: users.find(({ id }) => id === notif.producer)
+                }))
+        )
 })
 
 app.post('/groups/:groupId/verify_task/:taskId', (req, res) => {
@@ -372,4 +376,4 @@ app.use('/uploads', express.static('uploads'))
 app.listen(port, () => console.log(`app listening on port ${port}`))
 console.log(`ENV is ${process.env.NODE_ENV}`)
 
-module.exports = app;
+module.exports = app
