@@ -234,7 +234,6 @@ app.get('/groups/:groupId/notifications', (req, res) => {
     res.status(200)
         .send(
             (group.notifications || [])
-                .filter(({ producer }) => producer !== userId)
                 .map((notif) => ({
                     ...notif,
                     producer: users.find(({ id }) => id === notif.producer)

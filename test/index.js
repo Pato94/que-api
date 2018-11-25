@@ -327,21 +327,6 @@ describe('GET /notifications', () => {
                 done()
             })
     })
-
-    it('should not return notifications produced by me', (done) => {
-        const group = groups.find(({ id }) => id === 1)
-        group.notifications = [
-            { producer: 1, message: 'lalala', url: 'lalala' },
-            { producer: 2, message: 'lalala', url: 'lalala' },
-        ]
-
-        get('/groups/1/notifications')
-            .set('X-UserId', '1')
-            .end((err, res) => {
-                expect(res.body.length).to.eq(1)
-                done()
-            })
-    })
 })
 
 describe('POST /verify_task', () => {
