@@ -231,7 +231,11 @@ app.get('/groups/:groupId/notifications', (req, res) => {
     const group = getUserGroup(parseInt(req.params.groupId), userId, res)
     if (!group) return
 
-    res.status(200).send((group.notifications || []).filter(({ producer }) => producer !== userId))
+    res.status(200)
+        .send(
+            (group.notifications || [])
+                .filter(({ producer }) => producer !== userId)
+                .map(({ producer }) => users.find(({ id }) => id === producer)))
 })
 
 app.post('/groups/:groupId/verify_task/:taskId', (req, res) => {
