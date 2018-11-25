@@ -42,7 +42,8 @@ module.exports.groups = [
                 member: 3,
                 assigned: []
             }
-        ]
+        ],
+        availableTasks: [1, 2, 3]
     },
     {
         id: 2,
@@ -60,21 +61,25 @@ module.exports.groups = [
                 member: 2,
                 assigned: [3]
             }
-        ]
+        ],
+        availableTasks: [1, 2, 3]
     }
 ]
 
 module.exports.tasks = [
     {
         id: 1,
-        name: 'Sacar la basura'
+        name: 'Sacar la basura',
+        reward: 100
     },
     {
         id: 2,
-        name: 'Pasear el perro'
+        name: 'Pasear el perro',
+        reward: 100
     },
     {
         id: 3,
-        name: 'Lavar los platos'
+        name: 'Lavar los platos',
+        reward: 100
     }
 ]

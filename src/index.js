@@ -171,7 +171,9 @@ app.get('/groups/:groupId/available_tasks', (req, res) => {
     const group = getUserGroup(parseInt(req.params.groupId), userId, res)
     if (!group) return
 
-    res.status(200).send(tasks)
+    const actualTasks = (group.availableTasks || [])
+        .map(taskId => tasks.find(({ id }) => taskId === id))
+    res.status(200).send(actualTasks)
 })
 
 app.get('/groups/:groupId/my_tasks', (req, res) => {
@@ -268,6 +270,50 @@ app.post('/groups/:groupId/verify_task/:taskId', (req, res) => {
         `${username} solicitó una verificación para la tarea "${task.name}"`,
         photoUrl
     )
+
+    res.status(201).end()
+})
+
+app.post('/groups/:groupId/task', (req, res) => {
+    const userId = getUserId(req, res)
+    if (!userId) return
+
+    const group = getUserGroup(parseInt(req.params.groupId), userId, res)
+    if (!group) return
+
+    const { name, reward } = req.body
+    if (!name || !reward) {
+        res.status(422).send('Name or reward not provided').end()
+        return
+    }
+
+    const extraReward = reward - 100
+    const member = group.members.find(({ id }) => id === userId)
+    if (member.points < extraReward) {
+        res.status(422).send('Invalid reward')
+        return
+    }
+
+    member.points = member.points - extraReward
+
+    let maxId = 0
+    tasks.forEach(({ id }) => {
+        if (id > maxId) {
+            maxId = id
+        }
+    })
+
+    tasks.push({
+        name,
+        reward,
+        id: maxId + 1
+    })
+
+    if (!group.availableTasks) {
+        group.availableTasks = []
+    }
+
+    group.availableTasks.push(maxId + 1)
 
     res.status(201).end()
 })

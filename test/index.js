@@ -491,3 +491,96 @@ describe('DELETE /token', () => {
             })
     })
 })
+
+describe('POST /group/:groupId/task', () => {
+    it('should return 401 when the user is not authenticated', (done) => {
+        post('/groups/1/task')
+            .send({ name: 'Sacar la basura', reward: 100 })
+            .end((err, res) => {
+                expect(res.status).to.eq(401)
+                done()
+            })
+    })
+
+    it('should return 404 when the user does not belong to the group', (done) => {
+        post('/groups/1/task')
+            .set('X-UserId', '99999')
+            .send({ name: 'Sacar la basura', reward: 100 })
+            .end((err, res) => {
+                expect(res.status).to.eq(404)
+                done()
+            })
+    })
+
+    it('should return 422 when the name or the reward are not provided', (done) => {
+        post('/groups/1/task')
+            .set('X-UserId', '1')
+            .send({ name: 'Sacar la basura' })
+            .end((err, res) => {
+                expect(res.status).to.eq(422)
+                done()
+            })
+    })
+
+    it('should return 201 when everything is ok', (done) => {
+        post('/groups/1/task')
+            .set('X-UserId', '1')
+            .send({ name: 'Sacar la basura', reward: 100 })
+            .end((err, res) => {
+                expect(res.status).to.eq(201)
+                done()
+            })
+    })
+
+    it('should create a new task', (done) => {
+        const initialTasksSize = tasks.length
+
+        post('/groups/1/task')
+            .set('X-UserId', '1')
+            .send({ name: 'Hacer buenos tests', reward: 100 })
+            .end(() => {
+                expect(tasks.length - 1).to.eq(initialTasksSize)
+                expect(tasks.some(({ name }) => name === 'Hacer buenos tests')).to.be.true
+                done()
+            })
+    })
+
+    it('should add the new task to the group available tasks', (done) => {
+        const group = groups.find(({ id }) => id === 1)
+        const initialTasksSize = group.availableTasks.length
+
+        post('/groups/1/task')
+            .set('X-UserId', '1')
+            .send({ name: 'Hacer buenos tests 2', reward: 100 })
+            .end(() => {
+                const newTaskId = tasks.find(({ name }) => name === 'Hacer buenos tests 2').id
+                expect(group.availableTasks.length - 1).to.eq(initialTasksSize)
+                expect(group.availableTasks).to.include(newTaskId)
+                done()
+            })
+    })
+
+    it('should decrement users point if the reward is above 100', (done) => {
+        const group = groups.find(({ id }) => id === 1)
+        const member = group.members.find(({ id }) => id === 1)
+
+        expect(member.points).to.eq(100)
+        post('/groups/1/task')
+            .set('X-UserId', '1')
+            .send({ name: 'Hacer buenos tests 3', reward: 130 })
+            .end(() => {
+                expect(member.points).to.eq(70)
+                done()
+            })
+    })
+
+    it('should return 422 if the extra reward is above the users points', (done) => {
+        post('/groups/1/task')
+            .set('X-UserId', '1')
+            .send({ name: 'Hacer buenos tests 4', reward: 230 })
+            .end((err, res) => {
+                expect(res.status).to.eq(422)
+                done()
+            })
+    })
+})
