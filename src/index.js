@@ -122,13 +122,14 @@ app.post('/users', (req, res) => {
 
     if (end) return
 
-    users.push({
+    const newUser = {
         photo_url: 'https://www.freepngimg.com/thumb/internet_meme/1-2-forever-alone-meme-png-thumb.png',
         ...req.body,
         id: maxId + 1
-    })
+    }
+    users.push(newUser)
 
-    res.status(201).send({ id: maxId + 1 })
+    res.status(201).send(newUser)
 })
 
 app.get('/users', (req, res) => {
