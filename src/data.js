@@ -46,7 +46,8 @@ module.exports.groups = [
                 assigned: []
             }
         ],
-        availableTasks: [3, 4]
+        availableTasks: [3, 4],
+        url: 'https://api.adorable.io/avatars/64/grouperino.png'
     },
     {
         id: 2,
@@ -65,7 +66,8 @@ module.exports.groups = [
                 assigned: [3]
             }
         ],
-        availableTasks: [2]
+        availableTasks: [2],
+        url: 'https://api.adorable.io/avatars/64/grouperino.png'
     }
 ]
 
