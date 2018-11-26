@@ -70,7 +70,7 @@ function addNotification(type, userId, group, message, taskId, url) {
     }, ...group.notifications ]
 
     // TODO: Además necesitamos filtrar al creador
-    group.members.map(({ id: userId }) => {
+    group.members.filter(({ id }) => id !== userId).map(({ id: userId }) => {
         const user = users.find(({ id }) => userId === id)
         return user && user.token
     }).filter(a => a).forEach(token => {
