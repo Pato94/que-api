@@ -65,7 +65,7 @@ function addNotification(type, userId, group, message, taskId, url) {
         producer: userId,
         type: type,
         message: message,
-        taskId,
+        task_id: taskId,
         url: url
     }, ...group.notifications ]
 
