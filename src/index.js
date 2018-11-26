@@ -61,12 +61,12 @@ function addNotification(type, userId, group, message, url) {
         group.notifications = []
     }
 
-    group.notifications.push({
+    group.notifications = [ {
         producer: userId,
         type: type,
         message: message,
         url: url
-    })
+    }, ...group.notifications ]
 
     // TODO: Además necesitamos filtrar al creador
     group.members.map(({ id: userId }) => {
