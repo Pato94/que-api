@@ -74,7 +74,7 @@ function addNotification(type, userId, group, message, taskId, url) {
         const user = users.find(({ id }) => userId === id)
         return user && user.token
     }).filter(a => a).forEach(token => {
-        fcm(token, message)
+        fcm(token, message, group.id)
     })
 }
 
