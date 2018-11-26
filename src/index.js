@@ -123,6 +123,7 @@ app.post('/users', (req, res) => {
     if (end) return
 
     users.push({
+        photoUrl: 'https://www.freepngimg.com/thumb/internet_meme/1-2-forever-alone-meme-png-thumb.png',
         ...req.body,
         id: maxId + 1
     })
