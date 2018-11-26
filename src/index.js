@@ -328,6 +328,7 @@ app.post('/groups/:groupId/task', (req, res) => {
     tasks.push({
         name,
         reward,
+        created_by: userId,
         id: maxId + 1
     })
 
