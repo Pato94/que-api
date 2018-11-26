@@ -299,6 +299,51 @@ app.post('/groups/:groupId/verify_task/:taskId', (req, res) => {
     res.status(201).end()
 })
 
+app.post('/groups/:groupId/validate/:taskId', (req, res) => {
+    const userId = getUserId(req, res)
+    if (!userId) return
+
+    const group = getUserGroup(parseInt(req.params.groupId), userId, res)
+    if (!group) return
+
+    const taskId = parseInt(req.params.taskId)
+
+    const maybeVerification = (group.verifications || [])
+        .find(({ task }) => task === taskId)
+
+    if (!maybeVerification) {
+        res.status(404).send('Verification not found')
+        return
+    }
+
+    if (maybeVerification.member === userId) {
+        res.status(401).send('Cant validate your own task')
+        return
+    }
+
+    let task = group.tasks.find(({ member }) => member === maybeVerification.member)
+
+    if (!task || !task.assigned.includes(taskId)) {
+        res.status(422).send('Invalid task')
+        return
+    }
+
+    group.verifications = (group.verifications || []).filter(it => it !== maybeVerification)
+    task.assigned = (task.assigned || []).filter(it => it !== taskId)
+
+    const username = users.find(({ id }) => userId === id).full_name
+    const actualTaskName = tasks.find(({ id }) => taskId === id).name
+
+    addNotification(
+        'VALIDATION',
+        userId,
+        group,
+        `${username} verificó la tarea "${actualTaskName}"`
+    )
+
+    res.status(201).end()
+})
+
 app.post('/groups/:groupId/task', (req, res) => {
     const userId = getUserId(req, res)
     if (!userId) return

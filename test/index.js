@@ -583,3 +583,70 @@ describe('POST /group/:groupId/task', () => {
             })
     })
 })
+
+describe('POST /group/:groupId/validate/:taskId', () => {
+    const group = groups.find(({ id }) => id === 1)
+    group.verifications = [ { member: 1, task: 1, url: 'pepita' } ]
+
+    it('should return 401 when the user is not authenticated', (done) => {
+        post('/groups/1/validate/1')
+            .end((err, res) => {
+                expect(res.status).to.eq(401)
+                done()
+            })
+    })
+
+    it('should return 404 when the user does not belong to the group', (done) => {
+        post('/groups/1/validate/1')
+            .set('X-UserId', '99999')
+            .end((err, res) => {
+                expect(res.status).to.eq(404)
+                done()
+            })
+    })
+
+    it('should return 404 when the validation does not exist', (done) => {
+        post('/groups/1/validate/2')
+            .set('X-UserId', '2')
+            .end((err, res) => {
+                expect(res.status).to.eq(404)
+                done()
+            })
+    })
+
+    it('should return 401 when the authenticator is the producer', (done) => {
+        post('/groups/1/validate/1')
+            .set('X-UserId', '1')
+            .end((err, res) => {
+                expect(res.status).to.eq(401)
+                done()
+            })
+    })
+
+    it('should return 200 if everything goes well', (done) => {
+        post('/groups/1/validate/1')
+            .set('X-UserId', '2')
+            .end((err, res) => {
+                expect(res.status).to.eq(201)
+                done()
+            })
+    })
+
+    group.verifications = [
+        {
+            member: 1,
+            task: 1,
+            url: 'pepita'
+        }
+    ]
+
+    it('should remove the assigned task and the verification', (done) => {
+        post('/groups/1/validate/1')
+            .set('X-UserId', '2')
+            .end(() => {
+                expect(group.verifications).to.be.empty
+                expect(group.tasks.find(({ member }) => member === 1).assigned).to.not.include(1)
+                done()
+            })
+    })
+})
