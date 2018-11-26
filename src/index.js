@@ -160,6 +160,7 @@ app.post('/groups', (req, res) => {
 
     groups.push({
         ...{ name, members: memberAndPoints },
+        url: req.body.url || 'https://www.freepngimg.com/thumb/internet_meme/1-2-forever-alone-meme-png-thumb.png',
         id: maxId + 1,
         tasks: []
     })
