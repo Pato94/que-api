@@ -78,6 +78,14 @@ function addNotification(type, userId, group, message, taskId, url) {
     })
 }
 
+const taskStatus = group => taskId => {
+    if ((group.verifications || []).some(({ task }) => task === taskId)) {
+        return 'to_validate'
+    } else {
+        return 'to_verify'
+    }
+}
+
 app.use(bodyParser.json())
 
 app.post('/login', (req, res) => {
@@ -191,13 +199,7 @@ app.get('/groups/:groupId/my_tasks', (req, res) => {
     if (!task) {
         res.status(200).send('[]')
     } else {
-        const status = taskId => {
-            if ((group.verifications || []).some(({ task }) => task === taskId)) {
-                return 'to_validate'
-            } else {
-                return 'to_verify'
-            }
-        }
+        const status = taskStatus(group)
 
         const results = task.assigned
             .map(taskId => tasks.find(({ id }) => id === taskId))
@@ -250,6 +252,7 @@ app.get('/groups/:groupId/notifications', (req, res) => {
             (group.notifications || [])
                 .map((notif) => ({
                     ...notif,
+                    status: taskStatus(group)(notif.task_id),
                     producer: users.find(({ id }) => id === notif.producer)
                 }))
         )

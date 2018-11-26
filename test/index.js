@@ -632,19 +632,34 @@ describe('POST /group/:groupId/validate/:taskId', () => {
             })
     })
 
-    group.verifications = [
-        {
-            member: 1,
-            task: 1,
-            url: 'pepita'
-        }
-    ]
-
     it('should remove the assigned task and the verification', (done) => {
+        group.verifications = [
+            {
+                member: 1,
+                task: 1,
+                url: 'pepita'
+            }
+        ]
+        group.tasks = [
+            {
+                member: 1,
+                assigned: [1]
+            },
+            {
+                member: 2,
+                assigned: [2, 3]
+            },
+            {
+                member: 3,
+                assigned: []
+            }
+        ]
+        const initialSize = group.verifications.length
         post('/groups/1/validate/1')
             .set('X-UserId', '2')
-            .end(() => {
-                expect(group.verifications).to.be.empty
+            .end((err, res) => {
+                expect(res.status).to.eq(201)
+                expect(group.verifications.length).to.eq(initialSize - 1)
                 expect(group.tasks.find(({ member }) => member === 1).assigned).to.not.include(1)
                 done()
             })
