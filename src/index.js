@@ -453,7 +453,7 @@ app.post('/groups/:groupId/subscribe', (req, res) => {
 
     if (userGroup) {
         // This means the user is already in the group, just return
-        res.status(201).send(group)
+        res.status(201).send(addGroupData(group))
         return
     }
 
