@@ -417,7 +417,7 @@ app.post('/groups/:groupId/subscribe', (req, res) => {
 
     if (userGroup) {
         // This means the user is already in the group, just return
-        res.status(201).end()
+        res.status(201).send(group)
         return
     }
 
@@ -426,7 +426,7 @@ app.post('/groups/:groupId/subscribe', (req, res) => {
         points: 100
     })
 
-    res.status(201).end()
+    res.status(201).send(group)
 })
 
 app.post('/token', (req, res) => {
