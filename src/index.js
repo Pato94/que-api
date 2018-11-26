@@ -56,13 +56,14 @@ function getUserGroup(groupId, userId, res) {
     return group
 }
 
-function addNotification(userId, group, message, url) {
+function addNotification(type, userId, group, message, url) {
     if (!group.notifications) {
         group.notifications = []
     }
 
     group.notifications.push({
         producer: userId,
+        type: type,
         message: message,
         url: url
     })
@@ -284,12 +285,14 @@ app.post('/groups/:groupId/verify_task/:taskId', (req, res) => {
         url: photoUrl
     })
 
-    const username = users.find(({ id }) => userId === id).username
+    const username = users.find(({ id }) => userId === id).full_name
+    const actualTaskName = tasks.find(({ id }) => taskId === id).name
 
     addNotification(
+        'VERIFICATION',
         userId,
         group,
-        `${username} solicitó una verificación para la tarea "${task.name}"`,
+        `${username} solicitó una verificación para la tarea "${actualTaskName}"`,
         photoUrl
     )
 
@@ -337,6 +340,15 @@ app.post('/groups/:groupId/task', (req, res) => {
     }
 
     group.availableTasks.push(maxId + 1)
+
+    const username = users.find(({ id }) => userId === id).full_name
+
+    addNotification(
+        'TASK_CREATION',
+        userId,
+        group,
+        `${username} creó una nueva tarea "${name}"`
+    )
 
     res.status(201).end()
 })
