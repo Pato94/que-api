@@ -70,21 +70,25 @@ module.exports.tasks = [
     {
         id: 1,
         name: 'Sacar la basura',
-        reward: 100
+        reward: 100,
+        created_by: 1
     },
     {
         id: 2,
         name: 'Pasear el perro',
-        reward: 100
+        reward: 100,
+        created_by: 1
     },
     {
         id: 3,
         name: 'Lavar los platos',
-        reward: 100
+        reward: 100,
+        created_by: 1
     },
     {
         id: 4,
         name: 'Barrer',
-        reward: 100
+        reward: 100,
+        created_by: 1
     }
 ]

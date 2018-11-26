@@ -173,6 +173,7 @@ app.get('/groups/:groupId/available_tasks', (req, res) => {
 
     const actualTasks = (group.availableTasks || [])
         .map(taskId => tasks.find(({ id }) => taskId === id))
+        .map(task => ({ ...task, created_by: users.find(({ id }) => id === task.created_by) }))
     res.status(200).send(actualTasks)
 })
 
@@ -188,7 +189,18 @@ app.get('/groups/:groupId/my_tasks', (req, res) => {
     if (!task) {
         res.status(200).send('[]')
     } else {
-        const results = task.assigned.map(taskId => tasks.find(({ id }) => id === taskId)).filter(a => a)
+        const status = taskId => {
+            if ((group.verifications || []).some(({ task }) => task === taskId)) {
+                return 'to_validate'
+            } else {
+                return 'to_verify'
+            }
+        }
+
+        const results = task.assigned
+            .map(taskId => tasks.find(({ id }) => id === taskId))
+            .map(task => ({ ...task, created_by: users.find(({ id }) => id === task.created_by) }))
+            .map(task => ({ ...task, status: (status(task.id)) }))
         res.status(200).send(results)
     }
 })
