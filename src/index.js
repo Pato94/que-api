@@ -174,13 +174,22 @@ app.get('/mygroups', (req, res) => {
 
     const myGroups = userGroups(userId)
 
+    const lastMessage = (group) => {
+        if (!group.notifications || !group.notifications.length < 1) {
+            return 'Todavía no hay actividad...'
+        } else {
+            return group.notifications[0]
+        }
+    }
+
     res.status(200).send(
         myGroups.map(group => ({
             ...group,
             members: group.members.map(mem => ({
                 ...mem,
                 user: users.find(({ id }) => mem.id === id)
-            }))
+            })),
+            last_message: lastMessage(group)
         }))
     )
 })
