@@ -343,11 +343,19 @@ app.post('/groups/:groupId/validate/:taskId', (req, res) => {
         return
     }
 
+    const dbTask = tasks.find(({ id }) => taskId === id)
     group.verifications = (group.verifications || []).filter(it => it !== maybeVerification)
     task.assigned = (task.assigned || []).filter(it => it !== taskId)
+    group.members = group.members.map(member => {
+        if (member.id === maybeVerification.member) {
+            return { ...member, points: member.points + dbTask.reward }
+        } else {
+            return member
+        }
+    })
 
     const username = users.find(({ id }) => userId === id).full_name
-    const actualTaskName = tasks.find(({ id }) => taskId === id).name
+    const actualTaskName = dbTask.name
 
     addNotification(
         'VALIDATION',
