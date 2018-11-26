@@ -3,19 +3,22 @@ module.exports.users = [
         id: 1,
         username: 'pato9406@gmail.com',
         password: '123123',
-        full_name: 'Cristian Contreras'
+        full_name: 'Cristian Contreras',
+        photo_url: 'https://www.freepngimg.com/thumb/internet_meme/1-2-forever-alone-meme-png-thumb.png'
     },
     {
         id: 2,
         username: 'pato@test.com',
         password: '123123',
-        full_name: 'Patricio Contreras'
+        full_name: 'Patricio Contreras',
+        photo_url: 'https://www.freepngimg.com/thumb/internet_meme/1-2-forever-alone-meme-png-thumb.png'
     },
     {
         id: 3,
         username: 'pato94@test.com',
         password: '123123',
-        full_name: 'Rodolfo Contreras'
+        full_name: 'Rodolfo Contreras',
+        photo_url: 'https://www.freepngimg.com/thumb/internet_meme/1-2-forever-alone-meme-png-thumb.png'
     }
 ]
 
