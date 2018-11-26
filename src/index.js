@@ -506,6 +506,11 @@ app.post('/upload', upload.single('image'), (req, res) => {
     }
 })
 
+app.get('/invite/:groupId', (req, res) => {
+    res.set('location', `quehaceres://deeplink/groups/${req.params.groupId}/add`);
+    res.status(301).send()
+})
+
 app.use('/uploads', express.static('uploads'))
 
 app.listen(port, () => console.log(`app listening on port ${port}`))
