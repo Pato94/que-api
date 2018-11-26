@@ -19,6 +19,20 @@ module.exports.users = [
         password: '123123',
         full_name: 'Rodolfo Contreras',
         photo_url: 'https://www.freepngimg.com/thumb/internet_meme/1-2-forever-alone-meme-png-thumb.png'
+    },
+    {
+        id: 4,
+        username: 'rambo1416',
+        password: '123123',
+        full_name: 'Rambo Mambo',
+        photo_url: 'https://media.giphy.com/media/rdbyJJX8NbSBW/giphy.gif'
+    },
+    {
+        id: 5,
+        username: 'gonzagonza',
+        password: '123123',
+        full_name: 'Gonza De Dios',
+        photo_url: 'https://www.freepngimg.com/thumb/internet_meme/1-2-forever-alone-meme-png-thumb.png'
     }
 ]
 
@@ -63,6 +77,26 @@ module.exports.groups = [
             },
             {
                 member: 2,
+                assigned: [3]
+            }
+        ],
+        availableTasks: [2],
+        url: 'https://api.adorable.io/avatars/64/grouperino.png'
+    },
+    {
+        id: 2,
+        name: 'Quehaceres',
+        members: [
+            { id: 4, points: 100 },
+            { id: 5, points: 100 }
+        ],
+        tasks: [
+            {
+                member: 4,
+                assigned: [1]
+            },
+            {
+                member: 5,
                 assigned: [3]
             }
         ],
