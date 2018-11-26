@@ -398,6 +398,37 @@ app.post('/groups/:groupId/task', (req, res) => {
     res.status(201).end()
 })
 
+app.post('/groups/:groupId/subscribe', (req, res) => {
+    const userId = getUserId(req, res)
+    if (!userId) return
+    if (!users.some(({ id }) => userId === id)) {
+        res.status(404).end()
+        return
+    }
+
+    const groupId = parseInt(req.params.groupId)
+    const group = groups.find(({ id }) => id === groupId)
+    if (!group) {
+        res.status(404).end()
+        return
+    }
+
+    const userGroup = userGroups(userId).find(({ id }) => id === groupId)
+
+    if (userGroup) {
+        // This means the user is already in the group, just return
+        res.status(201).end()
+        return
+    }
+
+    group.members.push({
+        id: userId,
+        points: 100
+    })
+
+    res.status(201).end()
+})
+
 app.post('/token', (req, res) => {
     const userId = getUserId(req, res)
     if (!userId) return

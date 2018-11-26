@@ -650,3 +650,44 @@ describe('POST /group/:groupId/validate/:taskId', () => {
             })
     })
 })
+
+describe('POST /groups/:groupId/subscribe', () => {
+    const group = groups.find(({ id }) => id === 2)
+
+    it('should return 401 when the user is not authenticated', (done) => {
+        post('/groups/2/subscribe')
+            .end((err, res) => {
+                expect(res.status).to.eq(401)
+                done()
+            })
+    })
+
+    it('should return 404 if the group does not exist', (done) => {
+        post('/groups/47/subscribe')
+            .set('X-UserId', '3')
+            .end((err, res) => {
+                expect(res.status).to.eq(404)
+                done()
+            })
+    })
+
+    it('should return 404 if the user does not exist', (done) => {
+        post('/groups/1/subscribe')
+            .set('X-UserId', '47')
+            .end((err, res) => {
+                expect(res.status).to.eq(404)
+                done()
+            })
+    })
+
+    it('should return 201 when the user is added to the group', (done) => {
+        const groupSize = group.members.length
+        post('/groups/2/subscribe')
+            .set('X-UserId', '3')
+            .end((err, res) => {
+                expect(res.status).to.eq(201)
+                expect(groupSize).to.eq(group.members.length - 1)
+                done()
+            })
+    })
+})
