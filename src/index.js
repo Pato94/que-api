@@ -85,6 +85,22 @@ const taskStatus = group => taskId => {
         return 'to_verify'
     }
 }
+const lastMessage = (group) => {
+    if (!group.notifications || !group.notifications.length < 1) {
+        return 'Todavía no hay actividad...'
+    } else {
+        return group.notifications[0]
+    }
+}
+
+const addGroupData = group => ({
+    ...group,
+    members: group.members.map(mem => ({
+        ...mem,
+        user: users.find(({ id }) => mem.id === id)
+    })),
+    last_message: lastMessage(group)
+})
 
 app.use(bodyParser.json())
 
@@ -174,23 +190,8 @@ app.get('/mygroups', (req, res) => {
 
     const myGroups = userGroups(userId)
 
-    const lastMessage = (group) => {
-        if (!group.notifications || !group.notifications.length < 1) {
-            return 'Todavía no hay actividad...'
-        } else {
-            return group.notifications[0]
-        }
-    }
-
     res.status(200).send(
-        myGroups.map(group => ({
-            ...group,
-            members: group.members.map(mem => ({
-                ...mem,
-                user: users.find(({ id }) => mem.id === id)
-            })),
-            last_message: lastMessage(group)
-        }))
+        myGroups.map(addGroupData)
     )
 })
 
@@ -461,7 +462,7 @@ app.post('/groups/:groupId/subscribe', (req, res) => {
         points: 100
     })
 
-    res.status(201).send(group)
+    res.status(201).send(addGroupData(group))
 })
 
 app.post('/token', (req, res) => {
