@@ -56,7 +56,7 @@ function getUserGroup(groupId, userId, res) {
     return group
 }
 
-function addNotification(type, userId, group, message, url) {
+function addNotification(type, userId, group, message, taskId, url) {
     if (!group.notifications) {
         group.notifications = []
     }
@@ -65,6 +65,7 @@ function addNotification(type, userId, group, message, url) {
         producer: userId,
         type: type,
         message: message,
+        taskId,
         url: url
     }, ...group.notifications ]
 
@@ -293,6 +294,7 @@ app.post('/groups/:groupId/verify_task/:taskId', (req, res) => {
         userId,
         group,
         `${username} solicitó una verificación para la tarea "${actualTaskName}"`,
+        taskId,
         photoUrl
     )
 
@@ -338,7 +340,8 @@ app.post('/groups/:groupId/validate/:taskId', (req, res) => {
         'VALIDATION',
         userId,
         group,
-        `${username} verificó la tarea "${actualTaskName}"`
+        `${username} verificó la tarea "${actualTaskName}"`,
+        taskId
     )
 
     res.status(201).end()
@@ -392,7 +395,8 @@ app.post('/groups/:groupId/task', (req, res) => {
         'TASK_CREATION',
         userId,
         group,
-        `${username} creó una nueva tarea "${name}"`
+        `${username} creó una nueva tarea "${name}"`,
+        maxId + 1
     )
 
     res.status(201).end()
