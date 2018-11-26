@@ -173,7 +173,15 @@ app.get('/mygroups', (req, res) => {
 
     const myGroups = userGroups(userId)
 
-    res.status(200).send(myGroups)
+    res.status(200).send(
+        myGroups.map(group => ({
+            ...group,
+            members: group.members.map(mem => ({
+                ...mem,
+                user: users.find(({ id }) => mem.id === id)
+            }))
+        }))
+    )
 })
 
 app.get('/groups/:groupId/available_tasks', (req, res) => {
